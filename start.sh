@@ -32,8 +32,8 @@ masterSrcStartFile="$masterSrcDirectory/$masterStartFileName"
 masterDstStartFile="/$baseDstDirectory/$masterStartFileName"
 #主节点关闭脚本
 masterStopFileName="stopMaster.sh"
-masterSrcStopFile="$masterSrcDirectory/$masterStartFileName"
-masterDstStopFile="/$baseDstDirectory/$masterStartFileName"
+masterSrcStopFile="$masterSrcDirectory/$masterStopFileName"
+masterDstStopFile="/$baseDstDirectory/$masterStopFileName"
 
 #其他节点域名，IP，以及docker name
 clientHost=(ubuntu102 ubuntu103)
@@ -65,8 +65,8 @@ clientSrcStartFile="$clientSrcDirectory/$clientStartFileName"
 clientDstStartFile="/$baseDstDirectory/$clientStartFileName"
 #其他节点关闭脚本
 clientStopFileName="stopClient.sh"
-clientSrcStopFile="$clientSrcDirectory/$clientStartFileName"
-clientDstStopFile="/$baseDstDirectory/$clientStartFileName"
+clientSrcStopFile="$clientSrcDirectory/$clientStopFileName"
+clientDstStopFile="/$baseDstDirectory/$clientStopFileName"
 
 
 masterDockerPull(){
