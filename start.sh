@@ -11,11 +11,11 @@ masterSrcDirectory="master"
 masterIPPlaceholder="MASTERIP"
 masterHostNamePlaceholder="MASTERHOSTNAME"
 #主节点镜像下载脚本
-masterDownloadFileName="masterfile.sh"
+masterDownloadFileName="masterDockerFile.sh"
 masterSrcDownloadFile="$masterSrcDirectory/$masterDownloadFileName"
 masterDstDownloadFile="/$baseDstDirectory/$masterDownloadFileName"
 #主节点consul启动脚本
-masterConsulFileName="masterconsul.sh"
+masterConsulFileName="masterConsul.sh"
 masterSrcConsulFile="$masterSrcDirectory/$masterConsulFileName"
 masterDstConsulFile="/$baseDstDirectory/$masterConsulFileName"
 #主节点Swarm启动脚本
@@ -30,6 +30,10 @@ masterDstRegistratorFile="/$baseDstDirectory/$masterRegistratorFileName"
 masterStartFileName="startMaster.sh"
 masterSrcStartFile="$masterSrcDirectory/$masterStartFileName"
 masterDstStartFile="/$baseDstDirectory/$masterStartFileName"
+#主节点关闭脚本
+masterStopFileName="stopMaster.sh"
+masterSrcStopFile="$masterSrcDirectory/$masterStartFileName"
+masterDstStopFile="/$baseDstDirectory/$masterStartFileName"
 
 #其他节点域名，IP，以及docker name
 clientHost=(ubuntu102 ubuntu103)
@@ -40,11 +44,11 @@ clientSrcDirectory="client"
 clientIPPlaceholder="CLIENTIP"
 clientHostNamePlaceholder="CLIENTHOSTNAME"
 #其他节点镜像下载脚本
-clientDownloadFileName="clientfile.sh"
+clientDownloadFileName="clientDockerFile.sh"
 clientSrcDownloadFile="$clientSrcDirectory/$clientDownloadFileName"
 clientDstDownloadFile="/$baseDstDirectory/$clientDownloadFileName"
 #其他节点consul启动脚本
-clientConsulFileName="clientconsul.sh"
+clientConsulFileName="clientConsul.sh"
 clientSrcConsulFile="$clientSrcDirectory/$clientConsulFileName"
 clientDstConsulFile="/$baseDstDirectory/$clientConsulFileName"
 #其他节点Swarm启动脚本
@@ -59,6 +63,11 @@ clientDstRegistratorFile="/$baseDstDirectory/$clientRegistratorFileName"
 clientStartFileName="startClient.sh"
 clientSrcStartFile="$clientSrcDirectory/$clientStartFileName"
 clientDstStartFile="/$baseDstDirectory/$clientStartFileName"
+#其他节点关闭脚本
+clientStopFileName="stopClient.sh"
+clientSrcStopFile="$clientSrcDirectory/$clientStartFileName"
+clientDstStopFile="/$baseDstDirectory/$clientStartFileName"
+
 
 masterDockerPull(){
     #主节点下载镜像
@@ -153,6 +162,23 @@ clientStart()
     done
 }
 
+masterStop()
+{
+    #主节点关闭脚本
+    scp $masterSrcStopFile  root@$masterHost:$masterDstStopFile
+    ssh -t root@$masterHost "cat $masterDstStopFile"  
+}
+
+clientStop()
+{
+    #其他节点关闭脚本
+    for tmpHost in ${clientHost[@]};do
+        scp $clientSrcStopFile root@$tmpHost:$clientDstStopFile
+        ssh -t root@$tmpHost "cat $clientDstStopFile"
+    done
+}
+
+
 masterDockerPull
 clientDockerpull
 masterStartConsul
@@ -163,3 +189,5 @@ masterRegistrator
 clientRegistrator
 masterStart
 clientStart
+masterStop
+clientStop
