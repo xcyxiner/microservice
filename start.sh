@@ -22,6 +22,10 @@ masterDstConsulFile="/$baseDstDirectory/$masterConsulFileName"
 masterSwarmFileName="masterSwarm.sh"
 masterSrcSwarmFile="$masterSrcDirectory/$masterSwarmFileName"
 masterDstSwarmFile="/$baseDstDirectory/$masterSwarmFileName"
+#主节点Shipyard启动脚本
+masterShipyardFileName="masterShipyard.sh"
+masterSrcShipyardFile="$masterSrcDirectory/$masterShipyardFileName"
+masterDstShipyardFile="/$baseDstDirectory/$masterShipyardFileName"
 #主节点registrator脚本
 masterRegistratorFileName="masterRegistrator.sh"
 masterSrcRegistratorFile="$masterSrcDirectory/$masterRegistratorFileName"
@@ -112,6 +116,13 @@ masterSwarm(){
     ssh -t root@$masterHost "cat $masterDstSwarmFile"
 }
 
+masterShipyard(){
+    #开启主节点Shipyard
+    scp $masterSrcShipyardFile  root@$masterHost:$masterDstShipyardFile
+    ssh -t root@$masterHost "sed -i 's/$masterIPPlaceholder/$masterIP/g' $masterDstShipyardFile"
+    ssh -t root@$masterHost "cat $masterDstShipyardFile"
+}
+
 clientSwarm(){
      #开启其他节点Swarm代理
     for ((i=0;i<${#clientHost[@]};i++));do
@@ -184,6 +195,7 @@ clientDockerpull
 masterStartConsul
 clientStartConsul
 masterSwarm
+masterShipyard
 clientSwarm
 masterRegistrator
 clientRegistrator

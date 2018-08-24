@@ -1,0 +1,2 @@
+docker run -d --restart=always --name shipyard-rethinkdb rethinkdb
+docker run -d --restart=always --name shipyard-controller --link shipyard-rethinkdb:rethinkdb --link swarm-replication-master:swarm -p 8080:8080 shipyard/shipyard:latest    server -d tcp://swarm:3375
