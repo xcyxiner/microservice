@@ -8,6 +8,7 @@
 * [Ubuntu16.04 更改主机名](https://blog.csdn.net/wales_2015/article/details/79645637)
 * [Ubuntu 远程免密码登录设置](https://blog.csdn.net/weixin_37272286/article/details/80007649)
 * [Docker stop停止/remove删除所有容器](https://blog.csdn.net/superdangbo/article/details/78688904)
+* [通过Consul-Template实现动态配置服务](https://www.hi-linux.com/posts/36431.html)
 
 ## 宿主机
 
@@ -36,3 +37,6 @@
  cd /tmp
  sh startClient.sh
 ```
+
+# 文档介绍
+* [微服务之Consul](https://xcyxiner.github.io/2018/08/22/20180822%E5%BE%AE%E6%9C%8D%E5%8A%A11/)
