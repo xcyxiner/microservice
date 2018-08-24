@@ -38,6 +38,14 @@ masterDstStartFile="/$baseDstDirectory/$masterStartFileName"
 masterStopFileName="stopMaster.sh"
 masterSrcStopFile="$masterSrcDirectory/$masterStopFileName"
 masterDstStopFile="/$baseDstDirectory/$masterStopFileName"
+#主节点web脚本
+masterWebFileName="masterWeb.sh"
+masterSrcWebFile="$masterSrcDirectory/$masterWebFileName"
+masterDstWebFile="/$baseDstDirectory/$masterWebFileName"
+#主节点lb脚本
+masterLbFileName="masterLb.sh"
+masterSrcLbFile="$masterSrcDirectory/$masterLbFileName"
+masterDstLbFile="/$baseDstDirectory/$masterLbFileName"
 
 #其他节点域名，IP，以及docker name
 clientHost=(ubuntu102 ubuntu103)
@@ -71,6 +79,11 @@ clientDstStartFile="/$baseDstDirectory/$clientStartFileName"
 clientStopFileName="stopClient.sh"
 clientSrcStopFile="$clientSrcDirectory/$clientStopFileName"
 clientDstStopFile="/$baseDstDirectory/$clientStopFileName"
+#其他节点Web脚本
+clientWebFileName="clientWeb.sh"
+clientSrcWebFile="$clientSrcDirectory/$clientWebFileName"
+clientDstWebFile="/$baseDstDirectory/$clientWebFileName"
+
 
 
 masterDockerPull(){
@@ -189,6 +202,35 @@ clientStop()
     done
 }
 
+masterLb()
+{
+#主节点负载均衡脚本
+    scp $masterSrcLbFile  root@$masterHost:$masterDstLbFile
+    ssh -t root@$masterHost "sed -i 's/$masterHostNamePlaceholder/$masterName/g' $masterDstLbFile"
+    ssh -t root@$masterHost "cat $masterDstLbFile"  
+}
+
+
+masterWeb()
+{
+ #主节点测试web脚本
+    scp $masterSrcWebFile  root@$masterHost:$masterDstWebFile
+    ssh -t root@$masterHost "sed -i 's/$masterHostNamePlaceholder/$masterName/g' $masterDstWebFile"
+    ssh -t root@$masterHost "cat $masterDstWebFile"  
+}
+
+clientWeb()
+{
+#其他节点测试web脚本
+    for ((i=0;i<${#clientHost[@]};i++));do
+        tmpHost=${clientHost[$i]}
+        tmpName=${clientName[$i]}
+        tmpIp=${clientIp[$i]}
+        scp $clientSrcWebFile  root@$tmpHost:$clientDstWebFile
+        ssh -t root@$tmpHost "sed -i 's/$clientHostNamePlaceholder/$tmpName/g' $clientDstWebFile"
+        ssh -t root@$tmpHost "cat $clientDstWebFile"
+    done
+}
 
 masterDockerPull
 clientDockerpull
@@ -203,3 +245,6 @@ masterStart
 clientStart
 masterStop
 clientStop
+masterLb
+masterWeb
+clientWeb

@@ -1,0 +1,1 @@
+docker run -d -p 3001:80 -e SERVICE_80_NAME=my-web-server -e SERVICE_TAGS=MASTERHOSTNAME -e  MY_HOST=MASTERHOSTNAME-1 --restart=always --name=web liberalman/helloworld:latest
