@@ -1,15 +1,21 @@
 #!/bin/bash
 
 baseDstDirectory="tmp"
+baseVip="192.168.31.100"
+baseVIPPlaceholder="VIPADDRESS"
+
 
 #主节点域名，IP，以及docker name
 masterHost=ubuntu101
 masterName=node101
 masterIP="192.168.31.15"
 masterSrcDirectory="master"
+masterEth0Name="enp0s5"
 #占位符替换
 masterIPPlaceholder="MASTERIP"
 masterHostNamePlaceholder="MASTERHOSTNAME"
+masterEth0NamePlaceholder="MASTERETH0NAME"
+masterMemberPeersPlaceholder="MEMBERSPEERS"
 #主节点镜像下载脚本
 masterDownloadFileName="masterDockerFile.sh"
 masterSrcDownloadFile="$masterSrcDirectory/$masterDownloadFileName"
@@ -46,15 +52,22 @@ masterDstWebFile="/$baseDstDirectory/$masterWebFileName"
 masterLbFileName="masterLb.sh"
 masterSrcLbFile="$masterSrcDirectory/$masterLbFileName"
 masterDstLbFile="/$baseDstDirectory/$masterLbFileName"
+#主节点Keepalived脚本
+masterKeepalivedFileName="masterKeepalived.sh"
+masterSrcKeepalivedFile="$masterSrcDirectory/$masterKeepalivedFileName"
+masterDstKeepalivedFile="/$baseDstDirectory/$masterKeepalivedFileName"
 
 #其他节点域名，IP，以及docker name
 clientHost=(ubuntu102 ubuntu103)
 clientName=(node102 node103)
 clientIp=("192.168.31.19" "192.168.31.99")
 clientSrcDirectory="client"
+clientEth0Name="enp0s5"
 #占位符替换
 clientIPPlaceholder="CLIENTIP"
 clientHostNamePlaceholder="CLIENTHOSTNAME"
+clientEth0NamePlaceholder="CLIENTETH0NAME"
+clientMemberPeersPlaceholder="MEMBERSPEERS"
 #其他节点镜像下载脚本
 clientDownloadFileName="clientDockerFile.sh"
 clientSrcDownloadFile="$clientSrcDirectory/$clientDownloadFileName"
@@ -83,8 +96,35 @@ clientDstStopFile="/$baseDstDirectory/$clientStopFileName"
 clientWebFileName="clientWeb.sh"
 clientSrcWebFile="$clientSrcDirectory/$clientWebFileName"
 clientDstWebFile="/$baseDstDirectory/$clientWebFileName"
+#其他节点Keepalived脚本
+clientKeepalivedFileName="clientKeepalived.sh"
+clientSrcKeepalivedFile="$clientSrcDirectory/$clientKeepalivedFileName"
+clientDstKeepalivedFile="/$baseDstDirectory/$clientKeepalivedFileName"
 
 
+#获取除自己外的所有的IP
+getAllIp()
+{
+    tmpStr=""
+    tmpIP="192.168.31.100";
+    if [ $tmpIP != $masterIP ] ; then    
+        if [ -z ${tmpStr} ]; then
+            tmpStr="'${masterIP}'"
+        else
+            tmpStr="${tmpStr},'${masterIP}'"
+        fi
+    fi
+    for tmpclientIP in ${clientIp[@]};do
+        if [ $tmpIP != $tmpclientIP ] ; then
+            if [ -z ${tmpStr} ]; then
+                 tmpStr="'${tmpclientIP}'"
+            else
+                tmpStr="${tmpStr},'${tmpclientIP}'"
+            fi
+        fi
+    done
+    echo $tmpStr
+}
 
 masterDockerPull(){
     #主节点下载镜像
@@ -232,6 +272,68 @@ clientWeb()
     done
 }
 
+masterKeepalived()
+{
+ #主节点测试web脚本
+    scp $masterSrcKeepalivedFile  root@$masterHost:$masterDstKeepalivedFile
+    ssh -t root@$masterHost "sed -i 's/$baseVIPPlaceholder/$baseVip/g' $masterDstKeepalivedFile"
+    ssh -t root@$masterHost "sed -i 's/$masterEth0NamePlaceholder/$masterEth0Name/g' $masterDstKeepalivedFile"
+    tmpStr=""
+    tmpTestIP=$masterIP;
+    if [ $tmpTestIP != $masterIP ] ; then    
+        if [ -z ${tmpStr} ]; then
+            tmpStr="'${masterIP}'"
+        else
+            tmpStr="${tmpStr},'${masterIP}'"
+        fi
+    fi
+    for tmpclientIP in ${clientIp[@]};do
+        if [ $tmpTestIP != $tmpclientIP ] ; then
+            if [ -z ${tmpStr} ]; then
+                 tmpStr="'${tmpclientIP}'"
+            else
+                tmpStr="${tmpStr},'${tmpclientIP}'"
+            fi
+        fi
+    done
+    ssh -t root@$masterHost "sed -i \"s/$masterMemberPeersPlaceholder/$tmpStr/g\" $masterDstKeepalivedFile"
+    ssh -t root@$masterHost "cat $masterDstKeepalivedFile"  
+}
+
+clientKeepalived()
+{
+#其他节点测试web脚本
+    for ((i=0;i<${#clientHost[@]};i++));do
+        tmpHost=${clientHost[$i]}
+        tmpName=${clientName[$i]}
+        tmpIp=${clientIp[$i]}
+        scp $clientSrcKeepalivedFile  root@$tmpHost:$clientDstKeepalivedFile
+        ssh -t root@$tmpHost "sed -i 's/$baseVIPPlaceholder/$baseVip/g' $clientDstKeepalivedFile"
+        ssh -t root@$tmpHost "sed -i 's/$clientEth0NamePlaceholder/$clientEth0Name/g' $clientDstKeepalivedFile"
+    tmpStr=""
+    tmpTestIP=$tmpIp;
+    if [ $tmpTestIP != $masterIP ] ; then    
+        if [ -z ${tmpStr} ]; then
+            tmpStr="'${masterIP}'"
+        else
+            tmpStr="${tmpStr},'${masterIP}'"
+        fi
+    fi
+    for tmpclientIP in ${clientIp[@]};do
+        if [ $tmpTestIP != $tmpclientIP ] ; then
+            if [ -z ${tmpStr} ]; then
+                 tmpStr="'${tmpclientIP}'"
+            else
+                tmpStr="${tmpStr},'${tmpclientIP}'"
+            fi
+        fi
+    done
+        ssh -t root@$tmpHost "sed -i \"s/$clientMemberPeersPlaceholder/$tmpStr/g\" $clientDstKeepalivedFile"    
+        ssh -t root@$tmpHost "cat $clientDstKeepalivedFile"
+    done
+}
+
+
 masterDockerPull
 clientDockerpull
 masterStartConsul
@@ -248,3 +350,5 @@ clientStop
 masterLb
 masterWeb
 clientWeb
+masterKeepalived
+clientKeepalived

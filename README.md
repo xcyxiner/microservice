@@ -9,6 +9,8 @@
 * [Ubuntu 远程免密码登录设置](https://blog.csdn.net/weixin_37272286/article/details/80007649)
 * [Docker stop停止/remove删除所有容器](https://blog.csdn.net/superdangbo/article/details/78688904)
 * [通过Consul-Template实现动态配置服务](https://www.hi-linux.com/posts/36431.html)
+* [ChinaSilence/any-keepalived](https://github.com/ChinaSilence/any-keepalived)
+* [Docker 版 HAProxy + Keepalived 高可用进阶](https://www.jianshu.com/p/83036a320036)
 
 ## 宿主机
 
