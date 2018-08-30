@@ -96,6 +96,10 @@ clientDstStopFile="/$baseDstDirectory/$clientStopFileName"
 clientWebFileName="clientWeb.sh"
 clientSrcWebFile="$clientSrcDirectory/$clientWebFileName"
 clientDstWebFile="/$baseDstDirectory/$clientWebFileName"
+#其他节点lb脚本
+clientLbFileName="clientLb.sh"
+clientSrcLbFile="$clientSrcDirectory/$clientLbFileName"
+clientDstLbFile="/$baseDstDirectory/$clientLbFileName"
 #其他节点Keepalived脚本
 clientKeepalivedFileName="clientKeepalived.sh"
 clientSrcKeepalivedFile="$clientSrcDirectory/$clientKeepalivedFileName"
@@ -250,6 +254,19 @@ masterLb()
     ssh -t root@$masterHost "cat $masterDstLbFile"  
 }
 
+clientLb()
+{
+#其他节点测试Lb脚本
+    for ((i=0;i<${#clientHost[@]};i++));do
+        tmpHost=${clientHost[$i]}
+        tmpName=${clientName[$i]}
+        tmpIp=${clientIp[$i]}
+        scp $clientSrcLbFile  root@$tmpHost:$clientDstLbFile
+        ssh -t root@$tmpHost "sed -i 's/$clientHostNamePlaceholder/$tmpName/g' $clientDstLbFile"
+        ssh -t root@$tmpHost "cat $clientDstLbFile"
+    done
+}
+
 
 masterWeb()
 {
@@ -348,6 +365,7 @@ clientStart
 masterStop
 clientStop
 masterLb
+clientLb
 masterWeb
 clientWeb
 masterKeepalived

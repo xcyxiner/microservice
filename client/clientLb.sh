@@ -1,0 +1,1 @@
+docker run -d -p 80:80 --link=consul:consul --restart=always --name=lb liberalman/nginx-consul-template:latest
