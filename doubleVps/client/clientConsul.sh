@@ -1,0 +1,1 @@
+docker run -d --restart=always -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -h CLIENTHOSTNAME --name=consul progrium/consul -server -bootstrap-expect 1  -join MASTERIP -advertise CLIENTIP -client 0.0.0.0

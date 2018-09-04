@@ -1,0 +1,1 @@
+docker run -d --restart=always --name=registrator --net=host -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator -ip MASTERIP consul://MASTERIP:8500
